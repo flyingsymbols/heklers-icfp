@@ -15,7 +15,7 @@
 
 	; First IF here, handles the x coordinate difference
 
-	jlt ELSE1, a, c ; IF a > c Then...
+	jlt ELSE1, a, c ; IF a >= c Then...
 
 	sub a, c		; a = a - c
 	mov c, a		; c = a
@@ -31,7 +31,7 @@ ELSE1:				; ELSE
 	
 	; Second IF here, handles the y coordinate difference
 IF2:
-	jlt ELSE2, b, d	; IF b > d Then...
+	jlt ELSE2, b, d	; IF b >= d Then...
 	
 	sub b, d		; b = b - d
 	mov d, b		; d = b
