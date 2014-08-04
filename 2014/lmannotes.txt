@@ -1,0 +1,87 @@
+There are 4 programmer visible machine registers, all of which are for 
+special purposes:
+
+    %c: control register (program counter / instruction pointer)
+    %s: data stack register
+    %d: control stack register
+    %e: environment frame register
+
+Control stack saves return address and environment frame pointers
+SEL/JOIN AP/RAP/RTN
+
+Env stores params and locals
+has a pointer to parent frame
+not a stac
+Frame := (Parent::Frame, [vals])
+
+LDC <const> : push const on stack
+LD is like push
+LD <frameno> <itemno> : load from <frameno>'th ancestor frame <itemno>
+ADD : y = pop(), x = pop(), push(x+y)
+SUB : y = pop(), x = pop(), push(x-y)
+MUL : y = pop(), x = pop(), push(x*y)
+DIV : y = pop(), x = pop(), push(x/y)
+CEQ : y = pop(), x = pop(), push(1 if x == y else 0)
+CGT : y = pop(), x = pop(), push(1 if x > y else 0)
+CGTE : y = pop(), x = pop(), push(1 if x >= y else 0)
+ATOM : x = pop(), push(1 if is_int(x) else 0)
+CONS : y,x = pop(2), push(cons(x, y))
+CAR : x = pop(), assert is_cons(x), push(x[0])
+CDR : x = pop(), assert is_cons(x), push(x[1])
+
+SEL <t:true_ins_addr> <f:false_ins_addr>
+ : x = pop(), push_ctrl(JOIN(pc+1)), pc = t if (x != 0) else f
+JOIN
+ : pc = pop_ctrl(), assert is_join(pc)
+
+LDF <f:func_addr>
+ : x = closure(f, cur_env())
+ : PUSH
+
+AP <args_from_stack>//call function
+ : func_addr, env = pop() // pop off a closure and destructure
+ : fp = frame(<args_from_stack>)
+ : fp->parent = env
+ : args go on in reverse order, so that
+ : push 1, push 2, push 3, push f  -> ap(1,2,3)
+ :  push_ctl(e), push_ctl(pc+1), set new_env, pc = f
+
+RTN // return from function call
+ : ret_pc = pop_ctl()
+ : frame = pop_ctl()
+ : restore env and go to pc
+ : standard ABI 
+
+DUM <size of frame> // create empty env
+ : created with parent as our parent
+
+RAP <size of frame> // recursive environment call function
+ : x = pop(); // pop closure()
+ : func, frame = x
+
+STOP
+
+ST <nth frame> <ith_var>
+
+main(world_start_state, ghost_ais) -> (ai_start_state, ai_step_func)
+
+ai_step_func(ai_state, world_state) -> (ai_state, move)
+
+world-state = (map, lman_state, ghosts_status, fruit_status)
+
+map = [[0 - 6]] where 0:wall, 1:empty, 2:pill 3:powerpill 4:fruit 5:lman 6:ghost
+
+lman_state (vitality, loc (x,y), dir, lives, score)
+vitality = 0 : standard mode
+	  >0 : number of ticks of powerpill left
+dir = 0:up, 1:right, 2:down, 3:left
+
+ghosts_state = [ghost_state]
+ghost_state = (ghost_vitality, loc, dir)
+ghost_vitality = 0:standard, 1:fright, 2:invisible
+
+fruit_status =
+    0: no fruit present
+    >0: 
+
+=== Alway

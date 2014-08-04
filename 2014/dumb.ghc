@@ -1,0 +1,51 @@
+int 3	; Get this Ghost index A
+int 5	; Get this Ghost position from the index. input index from A --> output x,y into A, B
+
+mov c, a	; Save this Ghosts X in C
+mov d, b	; Save this Ghosts Y in D
+
+mov e, a	; Save long term in E
+mov f, b	; Save long term in F
+
+int 1	; Get Lambda Man's X, Y position in A, B
+
+; Can't deal with negatives, so to get absolute values
+; Have to use an If sort of thing
+
+; First IF here, handles the x coordinate difference
+
+jlt ELSE1, a, c ; IF a > c Then...
+
+sub a, c	; c = a - c
+mov g, 1	; The direction of Lambda is right
+jeq IF2, 0, 0	; Skip the ELSE
+
+ELSE1:	; ELSE
+
+sub c, a	; a = c - a 
+mov c, a	; c = a
+mov g, 3	; The direction of Lambda is left
+; The result of the first IF is in C
+; Second IF here, handles the y coordinate difference
+IF2:
+jlt ELSE2, b, d	; IF b > d Then...
+sub b, d	; d = b - d
+mov h, 2	; The direction of Lambda is down
+jeq IF2DONE, 0, 0
+ELSE2:	; ELSE
+sub d, b	; b = d - b
+mov d, b	; d = b
+mov h, 0	; The direction of Lambda is up
+IF2DONE:
+
+; The result of the second IF is in D
+; The absolute difference in position x, y is in c, d
+jlt ELSE3, c, d	; If c > d Then...
+mov a, g
+jeq IF3DONE, 0, 0
+ELSE3:
+
+mov a, h
+IF3DONE:
+
+int 0 ; Set the new direction to be towards the Lambda man!

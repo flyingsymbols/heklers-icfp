@@ -1,0 +1,119 @@
+; execution starts here with two arguments
+; 0: world state
+; 1: ghost programs
+; needs to return a pair of init_state, ai_step
+ LDC 0 ; currently just making state b a counter
+ LDF ai_step
+ CONS
+ RTN
+
+ai_step:
+ ; args
+ ; env0 : ai-state (just a counter atm)
+ ; env1 : world-state
+ ; locals
+ ; env2 : lman-loc
+ ; env3 : map
+
+ LD 0 0 ; load the current state (time in this case)
+ LDC 1
+ ADD
+ ST 0 0 ; store current tick back into the environment
+ LD 0 0 ; load updated time for first part of cons
+ LD 0 0 ; load updated time again for mod calc
+ LDC 3 ; num moves before dir change
+ DIV
+ LDC 4 ; mod by valid directions
+ LDF mod 
+ AP 2   ; call function
+ CONS
+ ST 0 0 ; Store so we can load again
+ LD 0 0
+ DBUG
+ LD 0 1 ; get world state so we can get map
+ CAR ; now we got a map
+ LD 0 1 ; load this world state
+ LDF lmanloc
+ AP 0 ; call lmanloc with worldstate
+ LDF dup
+ AP 1
+ DBUG ; just print the lman loc
+ LDF getloc
+ AP 2
+ DBUG
+ ; LD 0 0
+ LD 0 0
+ RTN
+
+dup:
+ LD 0 0
+ LD 0 0
+ RTN
+
+mod:
+ ; mod(x, y) -> x mod y
+ LD 0 0 ; load x (for use with final sub)
+ LD 0 0 ; load x
+ LD 0 1 ; load y
+ DIV
+ LD 0 1 ; load y
+ MUL
+ SUB
+ RTN
+
+lmanloc:
+ ; arg0[1][1]
+ CDR
+ CAR ; arg0[1]
+ CDR 
+ CAR ; arg0[1][1]
+ RTN
+
+getloc:
+ ; args
+ ; env0: map
+ ; env1: (x_coord, y_coord)
+ ;
+ LD 0 1
+ CAR
+ LD 0 1
+ CDR
+ ; LDF showstk2
+ ; AP 2
+ LD 0 0
+ LDF ind
+ AP 2 ; now have a row
+ LDF ind
+ AP 2 ; now have a col
+ RTN
+
+showstk2:
+ LD 0 1
+ LD 0 0
+ DBUG
+ DBUG
+ LD 0 0
+ LD 0 1
+ RTN
+
+ind:
+ ; env0: ind to use
+ ; env1: list_to_index
+ LD 0 1 ; env
+ LD 0 0 ; ind
+ TSEL ind_nonzero ind_zero
+ind_zero:
+ CAR
+ RTN
+ind_nonzero:
+ LD 0 0
+ LDC 1
+ SUB
+ LD 0 1
+ CDR
+ LDF ind
+ TAP 2
+
+ 
+
+
