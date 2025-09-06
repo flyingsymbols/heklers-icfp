@@ -260,3 +260,5 @@ if __name__ == "__main__":
                 graph.get_door_pairs(),
             ).json()
         )
+    else:
+        print("WE LOSE, there wasn't enough info to solve")
