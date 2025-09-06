@@ -1,0 +1,4 @@
+black==25.1.0
+graphviz==0.21
+requests==2.32.5
+requests-toolbelt==1.0.0
