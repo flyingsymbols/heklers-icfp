@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
-import requests
-import graphviz
 from itertools import combinations
-from requests_toolbelt.sessions import BaseUrlSession
-
 from random import randint
+
+import requests
+from requests_toolbelt.sessions import BaseUrlSession
+import graphviz
+
 from secret import ID
 
 PROBLEMS = {
@@ -27,6 +28,36 @@ PROBLEMS = {
     "iod": 90,
 }
 
+def main():
+    explorer = Explorer(ID, "probatio")
+    explorer.start()
+    plans = explorer.get_random_plans(12)
+    print("Our plan is:")
+    print(plans)
+    print("\n")
+    response = explorer.explore(plans)
+
+    graph = AEdificiumGraph(number_of_rooms=3)
+
+    print("The results we got were:")
+    print(response)
+    print("\n")
+    for plan, result in zip(plans, response["results"]):
+        graph.add_plan_result(plan, result)
+
+    print(graph.is_complete())
+    # graph.show_undirected()
+
+    if graph.is_complete():
+        print("WE WIN")
+        print(
+            explorer.guess(
+                graph.starting_room,
+                graph.get_door_pairs(),
+            ).json()
+        )
+    else:
+        print("WE LOSE, there wasn't enough info to solve")
 
 def random_plan(length):
     """
@@ -233,32 +264,4 @@ class AEdificiumGraph:
 
 
 if __name__ == "__main__":
-    explorer = Explorer(ID, "probatio")
-    explorer.start()
-    plans = explorer.get_random_plans(12)
-    print("Our plan is:")
-    print(plans)
-    print("\n")
-    response = explorer.explore(plans)
-
-    graph = AEdificiumGraph(number_of_rooms=3)
-
-    print("The results we got were:")
-    print(response)
-    print("\n")
-    for plan, result in zip(plans, response["results"]):
-        graph.add_plan_result(plan, result)
-
-    print(graph.is_complete())
-    # graph.show_undirected()
-
-    if graph.is_complete():
-        print("WE WIN")
-        print(
-            explorer.guess(
-                graph.starting_room,
-                graph.get_door_pairs(),
-            ).json()
-        )
-    else:
-        print("WE LOSE, there wasn't enough info to solve")
+    main()
