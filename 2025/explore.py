@@ -28,6 +28,7 @@ PROBLEMS = {
     "iod": 90,
 }
 
+
 def main():
     explorer = Explorer(ID, "probatio")
     explorer.start()
@@ -37,7 +38,7 @@ def main():
     print("\n")
     response = explorer.explore(plans)
 
-    graph = AEdificiumGraph(number_of_rooms=3)
+    graph = AEdificiumGraph(number_of_rooms=explorer.rooms)
 
     print("The results we got were:")
     print(response)
@@ -58,6 +59,7 @@ def main():
         )
     else:
         print("WE LOSE, there wasn't enough info to solve")
+
 
 def random_plan(length):
     """
