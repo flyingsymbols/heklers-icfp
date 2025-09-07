@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from explore import Explorer
+from explorer import Explorer
 from aedificium_trusted_room_graph import AEdificiumTrustedRoomGraph
 
 from secret import ID

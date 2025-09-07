@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import explore
+import explorer
 
 from secret import ID
 
