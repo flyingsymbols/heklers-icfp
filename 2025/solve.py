@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import queue
+from collections import deque
 from pathlib import Path
 from pprint import pprint as pp
 
@@ -21,11 +21,20 @@ def load_and_solve(json_fpath: Path):
 
     # For now, things to explore are a combination of (index to input/output:results, index of character in the string
     num_indices = len(obj.input)
-    to_explore = set((i, 0) for i in range(num_indices))
+    to_explore = deque((i, 0) for i in range(num_indices))
 
+
+    count = 0 
+    max_count = 100
     while to_explore:
-        input_i, str_i = to_explore.pop()
+        count += 1
+        if count > max_count:
+            break
+
+        input_i, str_i = to_explore.popleft()
         input_ = obj.input[input_i]
+        if str_i < len(input_):
+            to_explore.append((input_i, str_i+1))
         result = obj.output.results[input_i]
         door_list = input_[:str_i]
         cur_room = result[str_i]
@@ -50,16 +59,16 @@ def load_and_solve(json_fpath: Path):
                     raise RuntimeError('how did we get here?')
         else:
             new_paths_to_labels = {outgoing_door: outgoing_room}
-            data.show(new_paths_to_labels)
             labelmap = data.LabelMap(paths_to_labels=new_paths_to_labels, first_path=door_list)
             label_classes.paths_to_labelmaps[door_list] = labelmap
             label_classes.min_classes = max(label_classes.min_classes, 1)
 
-        data.show(label_classes)
+    data.show(solve_state)
 
+    ptpython.embed(globals(), locals(), configure=no_quit_confirm)
 
-    ptpython.embed(globals(), locals())
-
+def no_quit_confirm(repl):
+    repl.confirm_exit = False
         
 
 # Approach:
