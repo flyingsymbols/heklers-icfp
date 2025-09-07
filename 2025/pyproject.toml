@@ -5,6 +5,7 @@ requires-python = ">=3.10"
 dependencies = [
     "black==25.1.0",
     "graphviz==0.21",
+    "ptpython>=3.0.31",
     "pydantic>=2.11.7",
     "requests==2.32.5",
     "requests-toolbelt==1.0.0",

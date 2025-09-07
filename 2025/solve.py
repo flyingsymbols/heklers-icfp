@@ -4,6 +4,7 @@ from pathlib import Path
 from pprint import pprint as pp
 
 import typer
+import ptpython
 
 import data
 
@@ -13,6 +14,11 @@ def main():
 def load_and_solve(json_fpath: Path):
     obj = data.InOutPairs.load(json_fpath)
     data.show(obj)
+
+    solve_state = data.LabelSets.for_rooms(obj.num_rooms)
+    data.show(solve_state)
+
+    ptpython.embed(globals(), locals())
 
 # Approach:
 # we can uniquely identify paths, via a sequence rooted at the start room.
@@ -28,6 +34,16 @@ def load_and_solve(json_fpath: Path):
 # We can keep doing this until the number of classes equals the number of rooms.
 # For a given class, we can use a union-find type of datastructure in order to keep count of the possibilities
 # For this datastructure, we will initialize it with min_classes = num_rooms and max_classes = num_rooms
+# From a label, we have the following:
+# { door_list: label }
+# Once we have sum(min_classes(label) for all labels) == num_rooms, then we are done
+#
+# We need to handle a bucket of paths that we don't know which class they are in, because even once we know how many
+# classes there are, and have a unique reprentative of each, we don't know necessarily WHICH class each existing path goes to
+
+
+
+
 
 
 if __name__ == '__main__':
