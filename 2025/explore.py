@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 
-from itertools import combinations
+import os
+import json
+import datetime
 from random import randint
+from pprint import pprint as pp
+from itertools import combinations
 
 import requests
 from requests_toolbelt.sessions import BaseUrlSession
@@ -28,6 +32,9 @@ PROBLEMS = {
     "iod": 90,
 }
 
+DIRNAME = os.path.dirname(__file__)
+def rel(*path):
+    return os.path.join(DIRNAME, *path)
 
 def main():
     explorer = Explorer(ID, "probatio")
@@ -60,13 +67,15 @@ def main():
     else:
         print("WE LOSE, there wasn't enough info to solve")
 
-
 def random_plan(length):
     """
     Generate a randomized plan that visits length doors
     """
     return "".join(str(randint(0, 5)) for _ in range(length))
 
+def linear_plan(length, start=0, step=1):
+    "should make sure that step is coprime with 6"
+    return ''.join(str(n % 6) for n in range(start, start+length*step, step))
 
 class Explorer:
     def __init__(self, id_, problem):
@@ -75,6 +84,33 @@ class Explorer:
         self._session = BaseUrlSession(
             "https://31pwr5t6ij.execute-api.eu-west-2.amazonaws.com/"
         )
+
+    @classmethod
+    def for_problem(cls, problem_name, id_=None):
+        if id_ is None:
+            id_ = ID
+
+        o = cls(ID, problem_name)
+        res = o.start()
+        print(res)
+        num_rooms = o.rooms
+        print(f'# Rooms: {num_rooms}')
+        return o
+
+    def write_example(self, name, **vars_):
+        obj = {
+            'problem': self._problem,
+            'num_rooms': self.rooms,
+            **vars_
+        }
+
+        tstamp = datetime.datetime.now().strftime('%d-%H%M%S')
+        fname = f'{self._problem}-{name}-{tstamp}.json'
+        fpath = rel('examples', fname)
+
+        print(f'writing to {fpath}')
+        with open(fpath, 'w') as f:
+            json.dump(obj, f, indent=2)
 
     @property
     def rooms(self):
@@ -100,6 +136,20 @@ class Explorer:
         Get a random plan that uses the maximum allowable length, cause why not
         """
         return [random_plan(18 * self.rooms) for _ in range(num_plans)]
+
+    def explore_all_linear(self):
+        max_len = 18 * self.rooms
+        plans = [linear_plan(max_len, n) for n in range(0,6)]
+        pp(plans)
+        res = self.explore(plans)
+        new_results = []
+        for r in res['results']:
+            new_results.append(''.join(str(l) for l in r))
+        res['results'] = new_results
+        return {
+            'input': plans, 
+            'output': res
+        }
 
     def explore(self, plans):
         """
@@ -263,7 +313,6 @@ class AEdificiumGraph:
                 arrowtail="none",
             )
         dot.render("aedificium", view=True)
-
 
 if __name__ == "__main__":
     main()
