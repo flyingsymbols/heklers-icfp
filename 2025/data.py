@@ -48,7 +48,7 @@ class LabelClasses(BaseModel):
     max_classes: int
 
 class LabelMap(BaseModel):
-    paths_to_labels: typing.Dict['DoorPath', 'Door']
+    paths_to_labels: typing.Dict['DoorPath', 'RoomLabel']
     first_path: 'DoorPath'
 
 DoorList = typing.NewType('DoorList', str)
@@ -60,6 +60,9 @@ class RoomLabel(str, Enum):
     L2 = '2'
     L3 = '3'
 
+    def __repr__(self):
+        return self.name
+
 class Door(str, Enum):
     D0 = '0'
     D1 = '1'
@@ -67,6 +70,9 @@ class Door(str, Enum):
     D3 = '3'
     D4 = '4'
     D5 = '5'
+
+    def __repr__(self):
+        return self.name
 
 def show(x):
     rich.print(x)

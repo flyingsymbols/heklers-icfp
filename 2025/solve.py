@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import queue
 from pathlib import Path
 from pprint import pprint as pp
 
@@ -18,7 +19,48 @@ def load_and_solve(json_fpath: Path):
     solve_state = data.LabelSets.for_rooms(obj.num_rooms)
     data.show(solve_state)
 
+    # For now, things to explore are a combination of (index to input/output:results, index of character in the string
+    num_indices = len(obj.input)
+    to_explore = set((i, 0) for i in range(num_indices))
+
+    while to_explore:
+        input_i, str_i = to_explore.pop()
+        input_ = obj.input[input_i]
+        result = obj.output.results[input_i]
+        door_list = input_[:str_i]
+        cur_room = result[str_i]
+        outgoing_door = data.Door(input_[str_i]).value
+        outgoing_room = data.RoomLabel(result[str_i+1])
+        label_classes = solve_state.label_map[cur_room]
+        print(f'{input_i}:{str_i} -> {door_list} {cur_room} D{outgoing_door}:L{outgoing_room}')
+
+        if door_list in label_classes.paths_to_labelmaps:
+            labelmap = label_classes.paths_to_labelmaps[door_list].paths_to_labels
+            if outgoing_door not in labelmap:
+                labelmap[outgoing_door] = outgoing_room
+
+            else: # outgoing_door already exists in map
+                existing_room = labelmap[outgoing_door]
+                if existing_room == outgoing_room:
+                    # we don't need to do anything here, at the moment, may need to add additional things to explore in future
+                    pass
+                else:
+                    # in this case, we would have the same path having two different rooms from the same door, this should
+                    # be impossible
+                    raise RuntimeError('how did we get here?')
+        else:
+            new_paths_to_labels = {outgoing_door: outgoing_room}
+            data.show(new_paths_to_labels)
+            labelmap = data.LabelMap(paths_to_labels=new_paths_to_labels, first_path=door_list)
+            label_classes.paths_to_labelmaps[door_list] = labelmap
+            label_classes.min_classes = max(label_classes.min_classes, 1)
+
+        data.show(label_classes)
+
+
     ptpython.embed(globals(), locals())
+
+        
 
 # Approach:
 # we can uniquely identify paths, via a sequence rooted at the start room.
