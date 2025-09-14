@@ -103,17 +103,21 @@ class ProblemSession:
         ]
 
         while doors_to_be_matched:
+            # select 2 "with replacement" so that we can end up with a door linking to itself
             door1 = secrets.choice(doors_to_be_matched)
             door2 = secrets.choice(doors_to_be_matched)
 
+            # add to/from mappings
             door_index[door1] = door2
             door_index[door2] = door1
 
+            # remove door1, and if it's not the same door, remove door2
             doors_to_be_matched.remove(door1)
             if door1 != door2:
                 doors_to_be_matched.remove(door2)
 
         self.door_index = door_index
+        # for efficiency precalculate the hintified version of this graph for evaulating solutions
         self.hintified = hintify(door_index)
 
     def explore_all(self, plans) -> list[list[int]]:
