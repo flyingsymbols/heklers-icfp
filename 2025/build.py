@@ -21,7 +21,7 @@ BUILD_TYPES = {
 }
 
 
-def build_server(debug=False, run=False):
+def build_server(debug=False, run=False, run_port=80):
     """
     Build the aedificium server and optionally run it (on port 80)
     """
@@ -36,10 +36,12 @@ def build_server(debug=False, run=False):
             opts.extend(["-e", f"DEBUG={debug}"])
         else:
             opts.extend(["-v", "aedificium_data:/data"])
+        if run_port:
+            opts.extend(["-p", f"{run_port}:8000"])
+        else:
+            opts.extend(["-p", "8000"])
         try:
-            subprocess.check_call(
-                ["docker", "run", "-it", *opts, "-p", "80:8000", SERVER_IMAGE_NAME]
-            )
+            subprocess.check_call(["docker", "run", "-it", *opts, SERVER_IMAGE_NAME])
         except KeyboardInterrupt:
             pass
 
@@ -64,18 +66,22 @@ def cli():
 
         # add any per-build options
         if build_type == "server":
-            parser.add_argument(
-                "--debug", action="store_true"
-            )
+            parser.add_argument("--debug", action="store_true")
             parser.add_argument(
                 "--run", action="store_true", help="Run the server after build"
+            )
+            parser.add_argument(
+                "--run-port",
+                action="store",
+                default=80,
+                help="Specify the port to use for the server",
             )
 
     args = root_parser.parse_args()
 
     # run the chosen build
     if args.build_type == "server":
-        build_server(args.debug, args.run)
+        build_server(args.debug, args.run, args.run_port)
 
 
 if __name__ == "__main__":
