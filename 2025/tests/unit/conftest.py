@@ -1,10 +1,14 @@
-import sys
+"""
+Unit tests conftest
+"""
+
 import os
-from random import shuffle
+import sys
 from copy import deepcopy
+from random import shuffle
+from types import SimpleNamespace
 
 import pytest
-from types import SimpleNamespace
 
 from ..conftest import AEDIFICIUM_PATH
 
@@ -12,7 +16,7 @@ AEDIFICIUM_SERVER_PATH = os.path.join(AEDIFICIUM_PATH, "server")
 
 sys.path.insert(0, AEDIFICIUM_SERVER_PATH)
 
-from problem_session import ProblemSession, MapField
+from problem_session import MapField, ProblemSession # pylint: disable=wrong-import-position, wrong-import-order
 
 EXAMPLE_PROBATIO = SimpleNamespace(
     door_index={
@@ -119,13 +123,20 @@ EXAMPLE_PRIMUS = SimpleNamespace(
 
 @pytest.fixture(scope="function", params=[EXAMPLE_PROBATIO, EXAMPLE_PRIMUS])
 def problem(request):
+    """
+    Parametrized fixture that produces the example problem instances
+    """
     example = request.param
-    problem = ProblemSession("probatio")
-    problem.door_index = example.door_index
-    problem.hintified = example.hintified
-    return problem
+    problem_session = ProblemSession("probatio")
+    problem_session.door_index = example.door_index
+    problem_session.hintified = example.hintified
+    return problem_session
+
 
 def door_index_to_guess(door_index, number_of_rooms):
+    """
+    Build a guess MapField structure from a door_index
+    """
     return MapField(
         **{
             "rooms": range(number_of_rooms),
@@ -160,7 +171,8 @@ def shuffle_rooms(door_index, number_of_rooms):
         # get all the rooms that match this hint
         hint_rooms = range(hint, number_of_rooms, 4)
         # shuffle them and create a from/to mapping
-        new_rooms = shuffle(deepcopy(hint_rooms))
+        new_rooms = deepcopy(hint_rooms)
+        shuffle(new_rooms)
         for orig, new in zip(hint_rooms, new_rooms):
             room_number_remap[orig] = new
 
@@ -169,22 +181,33 @@ def shuffle_rooms(door_index, number_of_rooms):
         for (from_room, from_door), (to_room, to_door) in door_index.items()
     }
 
+
 def shuffle_all_door_mappings(door_index, number_of_rooms):
+    """
+    For good measure, just shuffle all the door mappings
+
+    For example if room 1 doors 2, 3 get you to room 2, and room 2 doors 4, 5 get you to room 1,
+    then it's equally valid to assume any pairs of doors link to each other:
+    {(1, 2):(2, 4), (1, 3):(2, 5)} or {(1, 3):(2, 4), (1, 2):(2, 5)}
+    """
     door_index = deepcopy(door_index)
     for room1 in range(number_of_rooms):
         for room2 in range(number_of_rooms):
             _shuffle_door_mappings(door_index, room1, room2)
     return door_index
 
+
 def _shuffle_door_mappings(door_index, room1, room2):
     """
     Shuffle the door mappings for a pair of rooms, returning a new door_index
     """
-    from_to_doors = list(filter(
-        lambda from_to: from_to[0][0] == room1 and from_to[1][0] == room2,
-        door_index.items(),
-    ))
-    if len(from_to_doors) <=1:
+    from_to_doors = list(
+        filter(
+            lambda from_to: from_to[0][0] == room1 and from_to[1][0] == room2,
+            door_index.items(),
+        )
+    )
+    if len(from_to_doors) <= 1:
         # No doors between these two rooms
         return door_index
     from_, to = map(list, zip(*from_to_doors))

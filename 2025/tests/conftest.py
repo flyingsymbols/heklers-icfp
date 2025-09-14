@@ -1,8 +1,10 @@
+"""
+Global conftest
+"""
 
-
-import sys
 import os
 import subprocess
+import sys
 
 REPO_PATH = (
     subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).decode().strip()
