@@ -7,7 +7,7 @@ from secret import ID
 
 
 def main():
-    explorer = Explorer("http://localhost", ID, "primus")
+    explorer = Explorer("http://localhost", ID, "secundus")
     explorer.start()
 
     solver = BifurcationSolver(explorer)

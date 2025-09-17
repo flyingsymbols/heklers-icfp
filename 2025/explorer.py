@@ -11,13 +11,16 @@ from requests_toolbelt.sessions import BaseUrlSession
 
 from util import rel
 
-PROBLEMS = {
+LIGHTNING_PROBLEMS = {
     "probatio": 3,
     "primus": 6,
     "secundus": 12,
     "tertius": 18,
     "quartus": 24,
     "quintus": 30,
+}
+
+ADDENDUM_PROBLEMS = {
     "aleph": 12,
     "beth": 24,
     "gimel": 36,
@@ -30,6 +33,8 @@ PROBLEMS = {
     "iod": 90,
 }
 
+PROBLEMS = LIGHTNING_PROBLEMS | ADDENDUM_PROBLEMS
+
 def random_plan(length):
     """
     Generate a randomized plan that visits length doors
@@ -41,11 +46,11 @@ def linear_plan(length, start=0, step=1):
     return ''.join(str(n % 6) for n in range(start, start+length*step, step))
 
 class Explorer:
-    def __init__(self, id_, problem):
+    def __init__(self, base_url, id_, problem):
         self._id = id_
         self._problem = problem
         self._session = BaseUrlSession(
-            "https://31pwr5t6ij.execute-api.eu-west-2.amazonaws.com/"
+            base_url
         )
 
     @classmethod
@@ -83,13 +88,18 @@ class Explorer:
         """
         Set up the problem "session"
         """
-        return self._session.post(
+        response = self._session.post(
             "/select",
             json={
                 "id": self._id,
                 "problemName": self._problem,
             },
-        ).json()
+        )
+
+        if not response.ok:
+            raise Exception(response.text)
+
+        return response.json()
 
     def get_random_plans(self, num_plans):
         """
@@ -115,19 +125,24 @@ class Explorer:
         """
         Explore with the plans and get back the results
         """
-        return self._session.post(
+        response = self._session.post(
             "/explore",
             json={
                 "id": self._id,
                 "plans": plans,
             },
-        ).json()
+        )
+
+        if not response.ok:
+            raise Exception(response.text)
+
+        return response.json()
 
     def guess(self, starting_room, door_pairs):
         """
         Submit a guess of the map
         """
-        return self._session.post(
+        response = self._session.post(
             "/guess",
             json={
                 "id": self._id,
@@ -150,3 +165,7 @@ class Explorer:
                 },
             },
         )
+
+        response.raise_for_status()
+
+        return response.json()

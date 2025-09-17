@@ -6,7 +6,7 @@ from aedificium_trusted_room_graph import AEdificiumTrustedRoomGraph
 from secret import ID
 
 def main():
-    explorer = Explorer(ID, "probatio")
+    explorer = Explorer("http://localhost", ID, "probatio")
     explorer.start()
     plans = explorer.get_random_plans(explorer.number_of_rooms * 4)
 
@@ -29,7 +29,7 @@ def main():
             explorer.guess(
                 graph.starting_room,
                 graph.get_door_pairs(),
-            ).json()
+            )
         )
     else:
         print("WE LOSE: there wasn't enough info to solve")
