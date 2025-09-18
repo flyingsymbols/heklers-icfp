@@ -128,7 +128,7 @@ class BifurcationSolver:
             for plan, result in zip(plans, response["results"]):
                 self._add_plan_result(plan, result)
 
-        # At this point we have 2 things:
+        # At this point we have 3 things:
 
         # 1. a unique path for each room
         room_paths = self._get_room_paths()
@@ -137,7 +137,7 @@ class BifurcationSolver:
         archetype_doors = self._get_archetype_doors()
 
 
-        # 3. a distinguishing (hint, door, next_room) "shape" for each room
+        # 3. a distinguishing (hint, door, next_hint) "shape" for each room
         room_archetype_lookup = self._get_room_archetype_lookup()
 
         console.print("Success! We found the following unique rooms:")
